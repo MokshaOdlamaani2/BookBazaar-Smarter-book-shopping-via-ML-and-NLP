@@ -1,0 +1,19 @@
+# server/.gitignore
+
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Uploaded files (if runtime-generated)
+uploads/
+
+# OS-specific
+.DS_Store
+Thumbs.db

@@ -1,0 +1,9 @@
+# In ml_model/.gitignore or root .gitignore
+
+venv/
+__pycache__/
+model/
+data/
+*.pkl
+*.json
+.env

@@ -1,0 +1,301 @@
+/* 🌿 Root Layout */
+.browse-wrapper {
+  display: flex;
+  padding: 2rem;
+  gap: 2rem;
+  background-color: #fffbe6;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 🧭 Sidebar */
+.browse-filter-sidebar {
+  width: 280px;
+  padding-right: 1rem;
+  border-right: 1px solid #eee;
+}
+
+.browse-filter-group {
+  margin-bottom: 1.6rem;
+}
+
+.browse-filter-sidebar input[type="text"],
+.browse-filter-sidebar select {
+  width: 90%;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.browse-filter-sidebar input[type="text"]::placeholder {
+  color: #aaa;
+}
+
+.browse-filter-sidebar input:focus,
+.browse-filter-sidebar select:focus {
+  border-color: #FFD700;
+  background-color: #fff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(255, 215, 0, 0.4);
+}
+
+.browse-filter-sidebar label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #444;
+}
+
+/* 📖 Main Content */
+.browse-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 🔧 Book Grid */
+.browse-book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+/* 📘 Book Card */
+.browse-book-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  align-items: flex-start;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: default;
+}
+
+.browse-book-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+}
+
+/* 📗 Book Image */
+.browse-book-thumb {
+  width: 150px;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+/* 📘 Book Info Section */
+.browse-book-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding-left: 0.5rem;
+  overflow: hidden;
+}
+
+.browse-book-info h4 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.browse-book-info p {
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+  color: #555;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.browse-book-info strong {
+  font-weight: 600;
+}
+
+/* ❤️ Like button */
+.browse-like-btn {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: #ff4444;
+  margin-top: 0.5rem;
+  transition: color 0.3s ease;
+  align-self: flex-start;
+}
+
+.browse-like-btn:hover {
+  color: #cc0000;
+}
+
+/* 🔗 View Details link */
+.browse-view-link {
+  font-size: 0.95rem;
+  color: #0056b3;
+  text-decoration: underline;
+  margin-top: 0.3rem;
+  display: inline-block;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  align-self: flex-start;
+}
+
+.browse-book-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem; /* space between image and button */
+  flex-shrink: 0; /* prevent shrinking */
+}
+
+/* Make sure button is wide enough */
+.browse-add-cart-btn {
+  background-color: #ffd700;
+  color: #000;
+  border: none;
+  padding: 0.5rem 0.5rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 140px;
+  text-align: center;
+}
+
+.browse-add-cart-btn:hover {
+  background-color: #e6c200;
+}
+
+.browse-add-cart-btn:hover {
+  background-color: #e6c200;
+}
+
+/* 🔻 Load More Button */
+.browse-load-more {
+  margin-top: 2rem;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  background-color: #000;
+  color: #FFD700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+  justify-self: center;
+  width: fit-content;
+}
+
+.browse-load-more:hover {
+  background-color: #333;
+}
+/* 🔍 Autocomplete Suggestion Dropdown */
+.suggestion-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  max-height: 400px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 0 0 10px 10px;
+  padding: 0;
+  margin-top: -1px;
+  list-style: none;
+}
+
+/* Each suggestion */
+.suggestion-dropdown li {
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background-color 0.2s ease;
+}
+
+/* Hover effect */
+.suggestion-dropdown li:hover {
+  background-color: #f3f3f3;
+}
+
+/* Ensure relative positioning on parent */
+.browse-filter-group {
+  position: relative;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .browse-wrapper {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .browse-filter-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .browse-book-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  .browse-book-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .browse-book-thumb {
+    width: 140px;
+    height: 190px;
+  }
+
+  .browse-book-info {
+    padding-left: 0;
+  }
+
+  .browse-like-btn,
+  .browse-view-link,
+  .browse-add-cart-btn {
+    align-self: center;
+  }
+}
+.browse-recent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.browse-toggle-btn {
+  background-color: #f0f0f0;
+  border: none;
+  padding: 5px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: 0.2s;
+}
+
+.browse-toggle-btn:hover {
+  background-color: #ddd;
+}

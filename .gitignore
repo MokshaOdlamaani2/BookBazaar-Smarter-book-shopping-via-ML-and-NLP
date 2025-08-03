@@ -1,0 +1,15 @@
+# Ignore virtual environments, large files, etc.
+venv/
+__pycache__/
+*.pkl
+*.json
+model/
+data/
+.env
+
+# Node modules
+client/node_modules/
+server/node_modules/
+
+# Uploads folder (optional)
+server/uploads/
