@@ -1,22 +1,36 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import joblib
+import os
 import yake
-
 from suggestion_model import SuggestionEngine
 
-# ✅ Only one Flask app
+# ✅ Initialize Flask app
 app = Flask(__name__)
 CORS(app)
 
-# Load model & vectorizer
+# 🔍 Debug: Show current files
+print("📂 Current files in project directory:")
+for root, dirs, files in os.walk(".", topdown=True):
+    for name in files:
+        print(os.path.join(root, name))
+
+# ✅ Load ML model and vectorizer
 try:
     genre_model = joblib.load('model/model.pkl')
     genre_vectorizer = joblib.load('model/vectorizer.pkl')
+    print("✅ Genre model and vectorizer loaded successfully.")
 except Exception as e:
-    print("❌ Error loading ML model:", e)
+    print("❌ Error loading ML model or vectorizer:", e)
 
-# Genre prediction
+# ✅ Initialize autocomplete engine
+try:
+    suggest_engine = SuggestionEngine('data/books.csv')
+    print("✅ Suggestion engine initialized with books.csv.")
+except Exception as e:
+    print("❌ Error initializing SuggestionEngine:", e)
+
+# 🧠 Genre prediction route
 @app.route('/predict-genre', methods=['POST'])
 def predict_genre():
     data = request.get_json()
@@ -31,7 +45,7 @@ def predict_genre():
     except Exception as e:
         return jsonify({'error': f'Prediction failed: {str(e)}'}), 500
 
-# Tag extraction
+# 🏷️ Tag extraction route
 @app.route('/extract-tags', methods=['POST'])
 def extract_tags():
     data = request.get_json()
@@ -47,17 +61,19 @@ def extract_tags():
     except Exception as e:
         return jsonify({'error': f'Tag extraction failed: {str(e)}'}), 500
 
-# Autocomplete route
-suggest_engine = SuggestionEngine('data/books.csv')
-
+# 🧠 Autocomplete route
 @app.route('/autocomplete', methods=['GET'])
 def autocomplete():
     query = request.args.get('q', '')
     if not query:
         return jsonify([])
 
-    suggestions = suggest_engine.suggest_titles(query)
-    return jsonify(suggestions)
+    try:
+        suggestions = suggest_engine.suggest_titles(query)
+        return jsonify(suggestions)
+    except Exception as e:
+        return jsonify({'error': f'Autocomplete failed: {str(e)}'}), 500
 
+# ✅ Run server
 if __name__ == '__main__':
     app.run(port=5001)
