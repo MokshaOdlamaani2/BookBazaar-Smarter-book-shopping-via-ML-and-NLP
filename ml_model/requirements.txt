@@ -6,3 +6,4 @@ joblib
 yake
 nltk
 rake-nltk
+requests
