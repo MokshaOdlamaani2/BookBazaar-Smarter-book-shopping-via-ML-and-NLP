@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: bookbazaar-ml
+    env: python
+    buildCommand: pip install -r ml_model/requirements.txt
+    startCommand: python ml_model/download_models.py && python ml_model/app.py
+    plan: free
+    envVars:
+      - key: PORT
+        value: 10000  # or leave blank; Render will auto-assign
