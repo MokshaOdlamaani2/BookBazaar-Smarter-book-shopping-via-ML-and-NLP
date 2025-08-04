@@ -1,10 +1,13 @@
 const axios = require('axios');
 const Book = require('../models/Book');
 
+// 🔗 Use environment variable for ML base URL
+const ML_SERVICE_URL = process.env.ML_SERVICE_URL ;
+
 exports.predictGenre = async (req, res) => {
   const { summary } = req.body;
   try {
-    const response = await axios.post('http://localhost:5001/predict-genre', { summary });
+    const response = await axios.post(`${ML_SERVICE_URL}/predict-genre`, { summary });
     res.json(response.data);
   } catch (err) {
     console.error('❌ Genre prediction failed:', err.message);
@@ -15,7 +18,7 @@ exports.predictGenre = async (req, res) => {
 exports.extractTags = async (req, res) => {
   const { summary } = req.body;
   try {
-    const response = await axios.post('http://localhost:5001/extract-tags', { summary });
+    const response = await axios.post(`${ML_SERVICE_URL}/extract-tags`, { summary });
     res.json(response.data);
   } catch (err) {
     console.error('❌ Tag extraction failed:', err.message);
@@ -23,7 +26,7 @@ exports.extractTags = async (req, res) => {
   }
 };
 
-// 🔠 Autocomplete search suggestions
+// 🔠 Autocomplete search suggestions (local DB-based)
 exports.getAutocompleteSuggestions = async (req, res) => {
   const query = req.query.q;
   if (!query) return res.status(400).json({ error: 'Query (q) is required' });
