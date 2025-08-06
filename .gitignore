@@ -10,6 +10,6 @@ data/
 # Node modules
 client/node_modules/
 server/node_modules/
-
+client/.env
 # Uploads folder (optional)
 server/uploads/
