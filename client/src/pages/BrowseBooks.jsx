@@ -14,6 +14,8 @@ import {
 import { addFavorite, removeFavorite } from "../utils/favorites";
 import "../styles/browseBooks.css";
 
+const API = process.env.REACT_APP_API_BASE_URL;
+
 const BrowseBooks = () => {
   const [books, setBooks] = useState([]);
   const [search, setSearch] = useState("");
@@ -41,7 +43,7 @@ const BrowseBooks = () => {
 
   const fetchBooks = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/books/all", {
+      const res = await axios.get(`${API}/api/books/all`, {
         params: { search, genre, condition, page, limit: 12 },
       });
       const newBooks = Array.isArray(res.data.books) ? res.data.books : [];
@@ -98,7 +100,6 @@ const BrowseBooks = () => {
     setPage(1);
   };
 
-  // Debounced autocomplete
   const debouncedFetchSuggestions = useRef(
     debounce(async (query) => {
       if (query.length < 2) {
@@ -108,7 +109,7 @@ const BrowseBooks = () => {
       }
 
       try {
-        const res = await axios.get("http://localhost:5000/api/ml/autocomplete", {
+        const res = await axios.get(`${API}/api/ml/autocomplete`, {
           params: { q: query },
         });
         setSuggestions(res.data.suggestions || []);
@@ -126,7 +127,6 @@ const BrowseBooks = () => {
     return () => debouncedFetchSuggestions.cancel();
   }, [search]);
 
-  // Close suggestion dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -147,7 +147,7 @@ const BrowseBooks = () => {
           src={
             book.image?.startsWith("http")
               ? book.image
-              : `http://localhost:5000/uploads/${book.image}`
+              : `${API}/uploads/${book.image}`
           }
           alt={book.title}
           className="browse-book-thumb"
@@ -183,7 +183,6 @@ const BrowseBooks = () => {
 
   return (
     <div className="browse-wrapper">
-      {/* Filters Sidebar */}
       <aside className="browse-filter-sidebar">
         <h3>🔍 Filters</h3>
         <div className="browse-filter-group" ref={suggestionBoxRef}>
@@ -248,7 +247,6 @@ const BrowseBooks = () => {
         </button>
       </aside>
 
-      {/* Main Content */}
       <main className="browse-main-content">
         <section className="browse-all-books-section">
           <h3>📘 Available Books</h3>

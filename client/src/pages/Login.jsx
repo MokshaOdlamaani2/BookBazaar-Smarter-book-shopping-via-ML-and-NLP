@@ -1,10 +1,11 @@
-// src/pages/Login.js
 import { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
 import { toast } from 'react-toastify';
 import '../styles/authPages.css';
+
+const API = process.env.REACT_APP_API_BASE_URL;
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -15,7 +16,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', {
+      const res = await axios.post(`${API}/api/auth/login`, {
         email,
         password,
       });

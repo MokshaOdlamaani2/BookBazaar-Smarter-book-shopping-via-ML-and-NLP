@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { getFavorites, removeFavorite } from "../utils/favorites";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
-import '../styles/bookDetail.css';
+import "../styles/bookDetail.css";
+
+const API = process.env.REACT_APP_API_BASE_URL;
+
 const Favorites = () => {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,15 +55,21 @@ const Favorites = () => {
                 src={
                   book.image?.startsWith("http")
                     ? book.image
-                    : `http://localhost:5000/uploads/${book.image}`
+                    : `${API}/uploads/${book.image}`
                 }
                 alt={book.title}
                 className="book-thumb"
               />
               <div className="book-info">
                 <h4>{book.title}</h4>
-                <p><strong>Author:</strong> {Array.isArray(book.author) ? book.author.join(", ") : book.author}</p>
-                <p><strong>Genre:</strong> {Array.isArray(book.genre) ? book.genre.join(", ") : book.genre}</p>
+                <p>
+                  <strong>Author:</strong>{" "}
+                  {Array.isArray(book.author) ? book.author.join(", ") : book.author}
+                </p>
+                <p>
+                  <strong>Genre:</strong>{" "}
+                  {Array.isArray(book.genre) ? book.genre.join(", ") : book.genre}
+                </p>
                 <div className="book-actions">
                   <button onClick={() => handleRemove(book._id)}>Remove</button>
                   <Link to={`/books/${book._id}`}>View</Link>

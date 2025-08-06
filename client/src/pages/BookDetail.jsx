@@ -9,8 +9,10 @@ import {
   getLikedBooks,
   toggleLikeBook
 } from '../utils/recommendationUtils';
-import { addFavorite, removeFavorite } from '../utils/favorites'; // ✅ Include backend sync
-import { addToCart } from '../utils/recommendationUtils'; // Optional for cart
+import { addFavorite, removeFavorite } from '../utils/favorites';
+import { addToCart } from '../utils/recommendationUtils';
+
+const API = process.env.REACT_APP_API_BASE_URL;
 
 const BookDetail = () => {
   const { id } = useParams();
@@ -25,12 +27,12 @@ const BookDetail = () => {
 
     const fetchBookAndExtras = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/books/${id}`);
+        const res = await axios.get(`${API}/api/books/${id}`);
         const bookData = res.data;
         setBook(bookData);
 
         if (bookData.summary) {
-          const tagRes = await axios.post('http://localhost:5000/api/ml/extract-tags', {
+          const tagRes = await axios.post(`${API}/api/ml/extract-tags`, {
             summary: bookData.summary,
           });
           setTags(tagRes.data.tags || []);
@@ -38,7 +40,7 @@ const BookDetail = () => {
 
         if (bookData.genre) {
           const genreQuery = Array.isArray(bookData.genre) ? bookData.genre[0] : bookData.genre;
-          const genreRes = await axios.get(`http://localhost:5000/api/books/genre`, {
+          const genreRes = await axios.get(`${API}/api/books/genre`, {
             params: { genre: genreQuery }
           });
           const filteredBooks = genreRes.data.books.filter(b => b._id !== id);
@@ -60,15 +62,15 @@ const BookDetail = () => {
 
     try {
       if (alreadyLiked) {
-        await removeFavorite(id); // ✅ Backend removal
+        await removeFavorite(id);
         toast.info(`❌ Removed "${book.title}" from favorites`);
       } else {
-        await addFavorite(id); // ✅ Backend add
+        await addFavorite(id);
         toast.success(`❤️ Added "${book.title}" to favorites`);
       }
 
-      toggleLikeBook(id); // Local toggle
-      setLikedBooks(getLikedBooks()); // Sync state
+      toggleLikeBook(id);
+      setLikedBooks(getLikedBooks());
     } catch (err) {
       toast.error("⚠️ Failed to update favorite");
       console.error(err);
@@ -77,11 +79,8 @@ const BookDetail = () => {
 
   const handleAddToCart = () => {
     const added = addToCart(book);
-    if (added) {
-      toast.success(`🛒 "${book.title}" added to cart`);
-    } else {
-      toast.info(`ℹ️ "${book.title}" is already in your cart`);
-    }
+    if (added) toast.success(`🛒 "${book.title}" added to cart`);
+    else toast.info(`ℹ️ "${book.title}" is already in your cart`);
   };
 
   if (loading) return <p>Loading book details...</p>;
@@ -93,7 +92,7 @@ const BookDetail = () => {
 
       {book.image ? (
         <img
-          src={book.image.startsWith('http') ? book.image : `http://localhost:5000/uploads/${book.image}`}
+          src={book.image.startsWith('http') ? book.image : `${API}/uploads/${book.image}`}
           alt={book.title}
           className="book-cover"
         />
@@ -143,7 +142,7 @@ const BookDetail = () => {
             {similarBooks.slice(0, 8).map((rec) => (
               <div className="book-card" key={rec._id}>
                 <img
-                  src={rec.image?.startsWith('http') ? rec.image : `http://localhost:5000/uploads/${rec.image}`}
+                  src={rec.image?.startsWith('http') ? rec.image : `${API}/uploads/${rec.image}`}
                   alt={rec.title}
                   className="book-thumbnail"
                 />

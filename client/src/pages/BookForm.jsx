@@ -18,12 +18,13 @@ const BookForm = () => {
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
   const token = localStorage.getItem('token');
+const API = process.env.REACT_APP_API_BASE_URL;
 
   useEffect(() => {
     const fetchBook = async () => {
       if (!id || id.length !== 24) return;
       try {
-        const res = await axios.get(`http://localhost:5000/api/books/${id}`);
+        const res = await axios.get(`${API}/api/books/${id}`);
         setBook(res.data);
       } catch (err) {
         console.error(err);
@@ -45,7 +46,7 @@ const BookForm = () => {
   const handlePredictGenre = async () => {
     try {
       setLoading(true);
-      const res = await axios.post('http://localhost:5000/api/ml/predict-genre', {
+      const res = await axios.post(`${API}/api/ml/predict-genre`, {
         summary: book.summary,
       });
       setBook({ ...book, genre: res.data.predicted_genre });
@@ -69,8 +70,9 @@ const BookForm = () => {
     };
 
     const endpoint = id
-      ? `http://localhost:5000/api/books/${id}`
-      : 'http://localhost:5000/api/books/add';
+  ? `${API}/api/books/${id}`
+  : `${API}/api/books/add`;
+
     const method = id ? axios.put : axios.post;
 
     try {

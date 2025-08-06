@@ -4,6 +4,8 @@ import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import "../styles/myListings.css";
 
+const API = process.env.REACT_APP_API_BASE_URL;
+
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [pastOrders, setPastOrders] = useState([]);
@@ -24,7 +26,7 @@ const Cart = () => {
 
   const fetchPastOrders = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/orders", {
+      const res = await axios.get(`${API}/api/orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPastOrders(res.data);
@@ -53,7 +55,7 @@ const Cart = () => {
 
     try {
       await axios.post(
-        "http://localhost:5000/api/orders",
+        `${API}/api/orders`,
         {
           items: cartItems,
           total,
@@ -82,7 +84,9 @@ const Cart = () => {
     return (
       <div className="cart-container">
         <h2>🛒 Your Cart</h2>
-        <p>Please <Link to="/login">login</Link> or <Link to="/register">register</Link> to access your cart and orders.</p>
+        <p>
+          Please <Link to="/login">login</Link> or <Link to="/register">register</Link> to access your cart and orders.
+        </p>
       </div>
     );
   }
@@ -102,7 +106,7 @@ const Cart = () => {
                   src={
                     book.image?.startsWith("http")
                       ? book.image
-                      : `http://localhost:5000/uploads/${book.image}`
+                      : `${API}/uploads/${book.image}`
                   }
                   alt={book.title}
                   className="cart-thumb"
@@ -111,9 +115,7 @@ const Cart = () => {
                   <h4>{book.title}</h4>
                   <p>Author: {book.author}</p>
                   <p>Price: ₹{Number(book.price).toFixed(2)}</p>
-                  <button onClick={() => handleRemove(book._id)}>
-                    Remove
-                  </button>
+                  <button onClick={() => handleRemove(book._id)}>Remove</button>
                 </div>
               </li>
             ))}
@@ -130,7 +132,6 @@ const Cart = () => {
         </>
       )}
 
-      {/* Past Orders */}
       {loadingOrders ? (
         <p>Loading your past orders...</p>
       ) : pastOrders.length > 0 ? (

@@ -5,6 +5,8 @@ import '../styles/myListings.css';
 import { AuthContext } from '../AuthContext';
 import { toast } from 'react-toastify';
 
+const API = process.env.REACT_APP_API_BASE_URL;
+
 const MyListings = () => {
   const [books, setBooks] = useState([]);
   const { token } = useContext(AuthContext);
@@ -15,7 +17,7 @@ const MyListings = () => {
 
     const fetchMyBooks = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/books/my-books', {
+        const res = await axios.get(`${API}/api/books/my-books`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setBooks(res.data);
@@ -31,7 +33,7 @@ const MyListings = () => {
     if (!window.confirm('Delete this book?')) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/books/${id}`, {
+      await axios.delete(`${API}/api/books/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBooks((prev) => prev.filter((b) => b._id !== id));
@@ -45,7 +47,9 @@ const MyListings = () => {
     return (
       <div className="my-listings-container">
         <h2>📚 My Book Listings</h2>
-        <p>Please <Link to="/login">login</Link> or <Link to="/register">register</Link> to view your listings.</p>
+        <p>
+          Please <Link to="/login">login</Link> or <Link to="/register">register</Link> to view your listings.
+        </p>
       </div>
     );
   }
@@ -65,7 +69,7 @@ const MyListings = () => {
                   src={
                     book.image.startsWith('http')
                       ? book.image
-                      : `http://localhost:5000/uploads/${book.image}`
+                      : `${API}/uploads/${book.image}`
                   }
                   alt={book.title}
                   className="book-thumbnail"

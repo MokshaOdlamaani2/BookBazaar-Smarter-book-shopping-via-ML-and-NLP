@@ -1,10 +1,11 @@
-// src/pages/Register.js
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../styles/authPages.css';
+
+const API = process.env.REACT_APP_API_BASE_URL;
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -15,7 +16,7 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/auth/register', {
+      await axios.post(`${API}/api/auth/register`, {
         name,
         email,
         password,
