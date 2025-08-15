@@ -66,20 +66,13 @@ router.get('/extract-tags/:bookId', rateLimiter, async (req, res) => {
   }
 });
 
-// 📌 Predict Genre (with caching + retry + fallback cache)
-router.get('/predict-genre/:bookId', rateLimiter, async (req, res) => {
+// 📌 Predict Genre via raw summary (no DB)
+router.post('/predict-genre', rateLimiter, async (req, res) => {
   try {
-    const { bookId } = req.params;
+    const { summary } = req.body;
+    if (!summary) return res.status(400).json({ error: 'Summary is required' });
 
-    const book = await Book.findById(bookId);
-    if (!book) return res.status(404).json({ error: 'Book not found' });
-
-    // ✅ Avoid re-predicting if genre is already good
-    if (book.genre && book.genre.length > 0 && book.genre[0] !== 'General') {
-      return res.json({ genre: book.genre, cached: true });
-    }
-
-    // ✅ Retry ML call with exponential backoff on 429
+    // Retry logic
     async function callWithRetry(url, data, retries = 3, delay = 1000) {
       for (let i = 0; i < retries; i++) {
         try {
@@ -96,44 +89,23 @@ router.get('/predict-genre/:bookId', rateLimiter, async (req, res) => {
       }
     }
 
-    const mlRes = await callWithRetry(process.env.ML_API_URL + '/predict-genre', {
-      summary: book.summary
-    });
+    const mlRes = await callWithRetry(process.env.ML_API_URL + '/predict-genre', { summary });
 
     const genre = mlRes.data.genre || ['General'];
-
-    // ✅ Save predicted genre to DB
-    book.genre = genre;
-    await book.save();
-
-    res.json({ genre, cached: false });
+    res.json({ predicted_genre: genre });
 
   } catch (err) {
-    console.error('❌ Genre prediction failed:', err.message);
+    console.error('❌ Genre prediction (raw summary) failed:', err.message);
 
-    // ✅ Handle ML rate limit: fallback + cache
     if (err.response && err.response.status === 429) {
-      const fallbackGenre = ['General'];
-      try {
-        // Cache the fallback to prevent repeated ML hits
-        const book = await Book.findById(req.params.bookId);
-        if (book) {
-          book.genre = fallbackGenre;
-          await book.save();
-        }
-      } catch (saveErr) {
-        console.warn('⚠️ Failed to cache fallback genre:', saveErr.message);
-      }
-
       return res.status(429).json({
         error: 'ML API rate limit hit. Returning fallback genre.',
-        genre: fallbackGenre
+        predicted_genre: ['General']
       });
     }
 
     res.status(500).json({ error: 'Genre prediction failed' });
   }
 });
-
 
 module.exports = router;
