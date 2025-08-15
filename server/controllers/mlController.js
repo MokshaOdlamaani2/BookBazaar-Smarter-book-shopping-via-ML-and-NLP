@@ -1,4 +1,3 @@
-// controllers/mlController.js
 import axios from 'axios';
 import Book from '../models/Book.js';
 
@@ -28,7 +27,6 @@ function rateLimiter(req, res, next) {
 }
 
 export async function extractTags(req, res) {
-  // You might want to use req.body.summary here instead of params
   try {
     const { bookId } = req.body;
     if (!bookId) return res.status(400).json({ error: 'bookId is required' });
@@ -40,7 +38,7 @@ export async function extractTags(req, res) {
       return res.json({ tags: book.tags, cached: true });
     }
 
-    const mlRes = await axios.post(`${process.env.ML_API_URL}/extract-tags`, {
+    const mlRes = await axios.post(`${process.env.ML_SERVICE_URL}/extract-tags`, {
       summary: book.summary,
     });
 
@@ -86,7 +84,7 @@ export async function predictGenre(req, res) {
       }
     }
 
-    const mlRes = await callWithRetry(`${process.env.ML_API_URL}/predict-genre`, { summary });
+    const mlRes = await callWithRetry(`${process.env.ML_SERVICE_URL}/predict-genre`, { summary });
 
     const genre = mlRes.data.genre || ['General'];
     res.json({ predicted_genre: genre });
@@ -106,12 +104,11 @@ export async function predictGenre(req, res) {
 }
 
 export async function getAutocompleteSuggestions(req, res) {
-  // Dummy implementation or call your ML API here
   try {
     const { query } = req.query;
     if (!query) return res.status(400).json({ error: 'Query parameter required' });
 
-    // Example response, replace with real call if needed
+    // Dummy autocomplete suggestions; replace with actual ML call if you want
     const suggestions = [
       query + ' book',
       query + ' author',
@@ -125,5 +122,4 @@ export async function getAutocompleteSuggestions(req, res) {
   }
 }
 
-// Export rateLimiter for optional use in routes if you want
 export { rateLimiter };
