@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const userFavoriteSchema = new mongoose.Schema({
   userId: {
-    type: String, // or mongoose.Schema.Types.ObjectId if users are in MongoDB
+    type: String, // or mongoose.Schema.Types.ObjectId if your users are stored in MongoDB
     required: true,
   },
   bookId: {
@@ -12,6 +12,9 @@ const userFavoriteSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-userFavoriteSchema.index({ userId: 1, bookId: 1 }, { unique: true }); // prevent duplicates
+// Composite unique index to prevent duplicates
+userFavoriteSchema.index({ userId: 1, bookId: 1 }, { unique: true });
 
-module.exports = mongoose.model('UserFavorite', userFavoriteSchema);
+const UserFavorite = mongoose.model('UserFavorite', userFavoriteSchema);
+
+export default UserFavorite;

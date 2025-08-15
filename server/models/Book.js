@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+// models/Book.js
+import mongoose from 'mongoose';
 
 const bookSchema = new mongoose.Schema({
   index: { type: Number, required: true, unique: true },
@@ -13,4 +14,6 @@ const bookSchema = new mongoose.Schema({
   tags: { type: [String], default: [] }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Book', bookSchema);
+const Book = mongoose.model('Book', bookSchema);
+
+export default Book;
