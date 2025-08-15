@@ -1,3 +1,4 @@
+// server.js
 import express from "express";
 import mongoose from "mongoose";
 import multer from "multer";
@@ -6,7 +7,7 @@ import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
 import Book from "./models/Book.js";
-import mlRoutes from "./routes/mlRoutes.js"; // ES module import
+import mlRoutes from "./routes/mlRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -18,16 +19,16 @@ app.use(express.json());
 // Ensure uploads folder exists
 const uploadDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 // Multer config
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadDir),
-    filename: (req, file, cb) => {
-        const uniqueName = Date.now() + path.extname(file.originalname);
-        cb(null, uniqueName);
-    }
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => {
+    const uniqueName = Date.now() + path.extname(file.originalname);
+    cb(null, uniqueName);
+  },
 });
 const upload = multer({ storage });
 
@@ -38,36 +39,37 @@ app.use("/uploads", express.static(uploadDir));
 app.use("/api/ml", mlRoutes);
 
 // MongoDB connection
-mongoose.connect(process.env.MONGO_URI, {
+mongoose
+  .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-.then(() => console.log("✅ MongoDB Connected"))
-.catch((err) => console.error("❌ MongoDB Error:", err));
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch((err) => console.error("❌ MongoDB Error:", err));
 
 // Add Book route
 app.post("/api/books/add", upload.single("image"), async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ error: "Image is required" });
-        }
-
-        const newBook = new Book({
-            title: req.body.title,
-            author: req.body.author,
-            summary: req.body.summary,
-            condition: req.body.condition,
-            genre: req.body.genre,
-            price: req.body.price,
-            image: `/uploads/${req.file.filename}`, // Note fix here, add '/uploads/'
-        });
-
-        await newBook.save();
-        res.status(201).json({ message: "✅ Book added successfully", book: newBook });
-    } catch (error) {
-        console.error("❌ Error saving book:", error.message);
-        res.status(500).json({ error: "Internal Server Error" });
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "Image is required" });
     }
+
+    const newBook = new Book({
+      title: req.body.title,
+      author: req.body.author,
+      summary: req.body.summary,
+      condition: req.body.condition,
+      genre: req.body.genre,
+      price: req.body.price,
+      image: `/uploads/${req.file.filename}`,
+    });
+
+    await newBook.save();
+    res.status(201).json({ message: "✅ Book added successfully", book: newBook });
+  } catch (error) {
+    console.error("❌ Error saving book:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 // Start server

@@ -1,36 +1,38 @@
-const express = require('express');
-const router = express.Router();
-const axios = require('axios');
-const Book = require('../models/Book');
+// controllers/mlController.js
+import axios from 'axios';
+import Book from '../models/Book.js';
 
 // Rate limiter (less aggressive)
 const rateLimitWindowMs = 60 * 1000; // 1 minute
 const maxRequestsPerWindow = 50;
-let requestCounts = {};
+const requestCounts = new Map();
 
 function rateLimiter(req, res, next) {
   const ip = req.ip;
   const now = Date.now();
 
-  if (!requestCounts[ip]) {
-    requestCounts[ip] = { count: 1, firstRequest: now };
+  if (!requestCounts.has(ip)) {
+    requestCounts.set(ip, { count: 1, firstRequest: now });
   } else {
-    if (now - requestCounts[ip].firstRequest < rateLimitWindowMs) {
-      requestCounts[ip].count++;
-      if (requestCounts[ip].count > maxRequestsPerWindow) {
+    const data = requestCounts.get(ip);
+    if (now - data.firstRequest < rateLimitWindowMs) {
+      data.count++;
+      if (data.count > maxRequestsPerWindow) {
         return res.status(429).json({ error: 'Too many ML requests. Try again later.' });
       }
     } else {
-      requestCounts[ip] = { count: 1, firstRequest: now };
+      requestCounts.set(ip, { count: 1, firstRequest: now });
     }
   }
   next();
 }
 
-// Extract tags (GET) with caching
-router.get('/extract-tags/:bookId', rateLimiter, async (req, res) => {
+export async function extractTags(req, res) {
+  // You might want to use req.body.summary here instead of params
   try {
-    const { bookId } = req.params;
+    const { bookId } = req.body;
+    if (!bookId) return res.status(400).json({ error: 'bookId is required' });
+
     const book = await Book.findById(bookId);
     if (!book) return res.status(404).json({ error: 'Book not found' });
 
@@ -39,7 +41,7 @@ router.get('/extract-tags/:bookId', rateLimiter, async (req, res) => {
     }
 
     const mlRes = await axios.post(`${process.env.ML_API_URL}/extract-tags`, {
-      summary: book.summary
+      summary: book.summary,
     });
 
     const tags = mlRes.data.tags || [];
@@ -55,21 +57,19 @@ router.get('/extract-tags/:bookId', rateLimiter, async (req, res) => {
     if (err.response && err.response.status === 429) {
       return res.status(429).json({
         error: 'ML API rate limit hit. Returning fallback tags.',
-        tags: ['Book', 'Reading', 'Fiction']
+        tags: ['Book', 'Reading', 'Fiction'],
       });
     }
 
     res.status(500).json({ error: 'Tag extraction failed' });
   }
-});
+}
 
-// Predict genre via raw summary (POST)
-router.post('/predict-genre', rateLimiter, async (req, res) => {
+export async function predictGenre(req, res) {
   try {
     const { summary } = req.body;
     if (!summary) return res.status(400).json({ error: 'Summary is required' });
 
-    // Retry logic
     async function callWithRetry(url, data, retries = 3, delay = 1000) {
       for (let i = 0; i < retries; i++) {
         try {
@@ -97,12 +97,33 @@ router.post('/predict-genre', rateLimiter, async (req, res) => {
     if (err.response && err.response.status === 429) {
       return res.status(429).json({
         error: 'ML API rate limit hit. Returning fallback genre.',
-        predicted_genre: ['General']
+        predicted_genre: ['General'],
       });
     }
 
     res.status(500).json({ error: 'Genre prediction failed' });
   }
-});
+}
 
-module.exports = router;
+export async function getAutocompleteSuggestions(req, res) {
+  // Dummy implementation or call your ML API here
+  try {
+    const { query } = req.query;
+    if (!query) return res.status(400).json({ error: 'Query parameter required' });
+
+    // Example response, replace with real call if needed
+    const suggestions = [
+      query + ' book',
+      query + ' author',
+      query + ' genre',
+    ];
+
+    res.json({ suggestions });
+  } catch (err) {
+    console.error('❌ Autocomplete failed:', err.message);
+    res.status(500).json({ error: 'Autocomplete failed' });
+  }
+}
+
+// Export rateLimiter for optional use in routes if you want
+export { rateLimiter };

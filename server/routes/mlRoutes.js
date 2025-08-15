@@ -1,20 +1,22 @@
+// routes/mlRoutes.js
 import express from 'express';
-import mlController from '../controllers/mlController.js';
+import {
+  predictGenre,
+  extractTags,
+  getAutocompleteSuggestions,
+  rateLimiter,
+} from '../controllers/mlController.js';
 
 const router = express.Router();
 
-// 🔮 Predict genre
-router.post('/predict-genre', mlController.predictGenre);
+router.use(rateLimiter);
 
-// 🏷 Extract tags from summary
-router.post('/extract-tags', mlController.extractTags);
+router.post('/predict-genre', predictGenre);
+router.post('/extract-tags', extractTags);
+router.get('/autocomplete', getAutocompleteSuggestions);
 
-// 🔠 Autocomplete search suggestions
-router.get('/autocomplete', mlController.getAutocompleteSuggestions);
-
-// Optional error handler
 router.use((err, req, res, next) => {
-  console.error("ML Route Error:", err.stack);
+  console.error('ML Route Error:', err.stack);
   res.status(500).json({ error: 'Something went wrong in ML routes.' });
 });
 
