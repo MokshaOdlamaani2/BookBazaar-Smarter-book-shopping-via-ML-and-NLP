@@ -1,57 +1,69 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const cors = require('cors');
-const path = require('path');
+import express from "express";
+import mongoose from "mongoose";
+import multer from "multer";
+import cors from "cors";
+import path from "path";
+import fs from "fs";
+import dotenv from "dotenv";
+import Book from "./models/Book.js";
 
 dotenv.config();
-
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-// ✅ Middleware
+// Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// ✅ Route imports
-const bookRoutes = require('./routes/bookRoutes');
-const authRoutes = require('./routes/authRoutes');
-const mlRoutes = require('./routes/mlRoutes');
-const favoriteRoutes = require('./routes/favoriteRoutes');
-const orderRoutes = require('./routes/orderRoutes');
+// Ensure uploads folder exists
+const uploadDir = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
 
-// ✅ MongoDB connection
-mongoose.connect(process.env.MONGO_URI, {
-  dbName: 'BookBazaarDB',
-})
-.then(() => console.log('✅ MongoDB connected'))
-.catch((err) => console.error('❌ MongoDB connection failed:', err));
+// Multer config
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+        const uniqueName = Date.now() + path.extname(file.originalname);
+        cb(null, uniqueName);
+    }
+});
+const upload = multer({ storage });
 
-// ✅ Route mounting
-app.use('/api/books', bookRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/ml', mlRoutes);
-app.use('/api/favorites', favoriteRoutes);
-app.use('/api/orders', orderRoutes);
+// Static folder for images
+app.use("/uploads", express.static(uploadDir));
 
-// ✅ Home route
-app.get('/', (req, res) => {
-  res.send('📚 Welcome to BookBazaar API');
+// MongoDB connection
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log("MongoDB Connected"))
+    .catch(err => console.error(err));
+
+// Add Book
+app.post("/api/books/add", upload.single("image"), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: "Image is required" });
+        }
+
+        const newBook = new Book({
+            title: req.body.title,
+            author: req.body.author,
+            price: req.body.price,
+            description: req.body.description,
+            image: `/uploads/${req.file.filename}`
+        });
+
+        await newBook.save();
+        res.status(201).json({ message: "Book added successfully", book: newBook });
+
+    } catch (error) {
+        console.error("Error saving book:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 });
 
-// ❌ 404 fallback
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
-
-// 🛠 Error handler
-app.use((err, req, res, next) => {
-  console.error('Server error:', err.stack);
-  res.status(500).json({ error: 'Something went wrong' });
-});
-
-// 🚀 Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+// Start server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
