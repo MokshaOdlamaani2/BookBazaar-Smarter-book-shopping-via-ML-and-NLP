@@ -6,6 +6,7 @@ import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
 import Book from "./models/Book.js";
+import mlRoutes from './routes/ml.js'; // ✅ Add this line
 
 dotenv.config();
 const app = express();
@@ -35,12 +36,15 @@ const upload = multer({ storage });
 // Static folder for images
 app.use("/uploads", express.static(uploadDir));
 
+// ✅ Register ML routes under /api/ml
+app.use('/api/ml', mlRoutes);
+
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("MongoDB Connected"))
     .catch(err => console.error(err));
 
-// Add Book
+// Add Book endpoint
 app.post("/api/books/add", upload.single("image"), async (req, res) => {
     try {
         if (!req.file) {

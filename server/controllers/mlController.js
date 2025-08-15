@@ -3,9 +3,9 @@ const router = express.Router();
 const axios = require('axios');
 const Book = require('../models/Book');
 
-// 📌 Less aggressive in-memory rate limiter
+// Rate limiter (less aggressive)
 const rateLimitWindowMs = 60 * 1000; // 1 minute
-const maxRequestsPerWindow = 50; // Increased from 5 to 50
+const maxRequestsPerWindow = 50;
 let requestCounts = {};
 
 function rateLimiter(req, res, next) {
@@ -27,26 +27,23 @@ function rateLimiter(req, res, next) {
   next();
 }
 
-// 📌 Extract Tags (with caching)
+// Extract tags (GET) with caching
 router.get('/extract-tags/:bookId', rateLimiter, async (req, res) => {
   try {
     const { bookId } = req.params;
-
-    // 1️⃣ Check if tags already exist in DB
     const book = await Book.findById(bookId);
     if (!book) return res.status(404).json({ error: 'Book not found' });
+
     if (book.tags && book.tags.length > 0) {
       return res.json({ tags: book.tags, cached: true });
     }
 
-    // 2️⃣ Call ML API
-    const mlRes = await axios.post(process.env.ML_API_URL + '/extract-tags', {
+    const mlRes = await axios.post(`${process.env.ML_API_URL}/extract-tags`, {
       summary: book.summary
     });
 
     const tags = mlRes.data.tags || [];
 
-    // 3️⃣ Save to DB
     book.tags = tags;
     await book.save();
 
@@ -66,7 +63,7 @@ router.get('/extract-tags/:bookId', rateLimiter, async (req, res) => {
   }
 });
 
-// 📌 Predict Genre via raw summary (no DB)
+// Predict genre via raw summary (POST)
 router.post('/predict-genre', rateLimiter, async (req, res) => {
   try {
     const { summary } = req.body;
@@ -89,7 +86,7 @@ router.post('/predict-genre', rateLimiter, async (req, res) => {
       }
     }
 
-    const mlRes = await callWithRetry(process.env.ML_API_URL + '/predict-genre', { summary });
+    const mlRes = await callWithRetry(`${process.env.ML_API_URL}/predict-genre`, { summary });
 
     const genre = mlRes.data.genre || ['General'];
     res.json({ predicted_genre: genre });
