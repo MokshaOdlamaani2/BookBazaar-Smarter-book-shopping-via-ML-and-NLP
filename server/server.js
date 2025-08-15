@@ -6,7 +6,7 @@ import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
 import Book from "./models/Book.js";
-import mlRoutes from './routes/ml.js'; // ✅ Add this line
+import mlRoutes from "./routes/mlRoutes.js"; // ✅ Import ML routes
 
 dotenv.config();
 const app = express();
@@ -33,18 +33,21 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Static folder for images
+// Serve uploaded images statically
 app.use("/uploads", express.static(uploadDir));
 
-// ✅ Register ML routes under /api/ml
-app.use('/api/ml', mlRoutes);
+// ✅ Use ML routes (e.g., /api/ml/predict-genre, /api/ml/extract-tags/:id)
+app.use("/api/ml", mlRoutes);
 
 // MongoDB connection
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log("MongoDB Connected"))
-    .catch(err => console.error(err));
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+.then(() => console.log("✅ MongoDB Connected"))
+.catch((err) => console.error("❌ MongoDB Error:", err));
 
-// Add Book endpoint
+// ✅ Add Book route
 app.post("/api/books/add", upload.single("image"), async (req, res) => {
     try {
         if (!req.file) {
@@ -54,20 +57,21 @@ app.post("/api/books/add", upload.single("image"), async (req, res) => {
         const newBook = new Book({
             title: req.body.title,
             author: req.body.author,
+            summary: req.body.summary,
+            condition: req.body.condition,
+            genre: req.body.genre,
             price: req.body.price,
-            description: req.body.description,
-            image: `/uploads/${req.file.filename}`
+            image: req.file.filename,
         });
 
         await newBook.save();
-        res.status(201).json({ message: "Book added successfully", book: newBook });
-
+        res.status(201).json({ message: "✅ Book added successfully", book: newBook });
     } catch (error) {
-        console.error("Error saving book:", error);
+        console.error("❌ Error saving book:", error.message);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
 
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
