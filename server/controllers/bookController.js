@@ -97,7 +97,7 @@ exports.updateBook = async (req, res) => {
   }
 };
 
-// 🔍 All books with filters
+// 🔍 All books with filters and pagination
 exports.getAllBooks = async (req, res) => {
   try {
     const { genre, condition, minPrice, maxPrice, search, page = 1, limit = 12 } = req.query;
@@ -134,7 +134,7 @@ exports.getAllBooks = async (req, res) => {
   }
 };
 
-// 📥 By IDs
+// 📥 Fetch books by IDs
 exports.getBooksByIds = async (req, res) => {
   try {
     const { ids } = req.query;
@@ -149,7 +149,7 @@ exports.getBooksByIds = async (req, res) => {
   }
 };
 
-// 🎯 Genre based
+// 🎯 Get books by genre
 exports.getBooksByGenre = async (req, res) => {
   try {
     const { genre } = req.query;
@@ -162,7 +162,6 @@ exports.getBooksByGenre = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch books by genre' });
   }
 };
-
 
 // 📄 Get one book by ID
 exports.getBookById = async (req, res) => {

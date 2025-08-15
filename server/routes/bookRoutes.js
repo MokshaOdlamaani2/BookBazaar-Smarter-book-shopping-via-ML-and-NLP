@@ -4,10 +4,10 @@ const multer = require('multer');
 const { protect } = require('../middleware/authMiddleware');
 const bookController = require('../controllers/bookController');
 
-// 📦 Multer Config
+// 📦 Multer Config for image uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/');
+    cb(null, 'uploads/');  // Ensure 'uploads/' folder exists and is writable
   },
   filename: function (req, file, cb) {
     const ext = file.originalname.split('.').pop();
@@ -16,17 +16,18 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// 🔐 Routes
+// 🔐 Protected routes with authentication
 router.post('/add', protect, upload.single('image'), bookController.addBook);
 router.put('/:id', protect, upload.single('image'), bookController.updateBook);
 router.delete('/:id', protect, bookController.deleteBook);
-
-router.get('/all', bookController.getAllBooks);
 router.get('/my-books', protect, bookController.getMyBooks);
+
+// 🔓 Public routes
+router.get('/all', bookController.getAllBooks);
 router.get('/genre', bookController.getBooksByGenre);
 router.get('/by-ids', bookController.getBooksByIds);
 
-// 🔚 Must be last
+// 🔚 This route must come last to prevent conflict with above routes
 router.get('/:id', bookController.getBookById);
 
 module.exports = router;

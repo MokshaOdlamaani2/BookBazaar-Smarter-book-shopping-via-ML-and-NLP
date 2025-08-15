@@ -1,4 +1,3 @@
-// server.js
 import express from "express";
 import mongoose from "mongoose";
 import multer from "multer";
@@ -6,8 +5,9 @@ import cors from "cors";
 import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
-import Book from "./models/Book.js";
+import bookRoutes from "./routes/bookRoutes.js";
 import mlRoutes from "./routes/mlRoutes.js";
+import { protect } from "./middleware/authMiddleware.js";
 
 dotenv.config();
 const app = express();
@@ -16,29 +16,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Ensure uploads folder exists
+// Ensure uploads directory exists
 const uploadDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Multer config
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const uniqueName = Date.now() + path.extname(file.originalname);
-    cb(null, uniqueName);
-  },
-});
-const upload = multer({ storage });
-
-// Serve uploaded images statically
+// Serve uploads statically
 app.use("/uploads", express.static(uploadDir));
 
-// Use ML routes
-app.use("/api/ml", mlRoutes);
-
-// MongoDB connection
+// Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -47,30 +34,14 @@ mongoose
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ MongoDB Error:", err));
 
-// Add Book route
-app.post("/api/books/add", upload.single("image"), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: "Image is required" });
-    }
+// Use routers
+app.use("/api/ml", mlRoutes);
 
-    const newBook = new Book({
-      title: req.body.title,
-      author: req.body.author,
-      summary: req.body.summary,
-      condition: req.body.condition,
-      genre: req.body.genre,
-      price: req.body.price,
-      image: `/uploads/${req.file.filename}`,
-    });
+// Protect routes that need authentication
+app.use("/api/books", protect, bookRoutes);
 
-    await newBook.save();
-    res.status(201).json({ message: "✅ Book added successfully", book: newBook });
-  } catch (error) {
-    console.error("❌ Error saving book:", error.message);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+// Optional: a public route example without auth (e.g. home page)
+app.get("/", (req, res) => res.send("Welcome to BookBazaar API"));
 
 // Start server
 const PORT = process.env.PORT || 5000;
