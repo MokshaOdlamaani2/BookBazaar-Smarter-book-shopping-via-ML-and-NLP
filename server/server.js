@@ -1,12 +1,17 @@
 import express from "express";
 import mongoose from "mongoose";
-import multer from "multer";
 import cors from "cors";
 import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
+
 import bookRoutes from "./routes/bookRoutes.js";
 import mlRoutes from "./routes/mlRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+import favoriteRoutes from "./routes/favoriteRoutes.js";
+import contactRoutes from "./routes/contactRoutes.js";
+
 import { protect } from "./middleware/authMiddleware.js";
 
 dotenv.config();
@@ -34,13 +39,17 @@ mongoose
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ MongoDB Error:", err));
 
-// Use routers
+// Public routes
+app.use("/api/auth", authRoutes);
 app.use("/api/ml", mlRoutes);
+app.use("/api/contact", contactRoutes);
 
-// Protect routes that need authentication
+// Routes requiring authentication (protect middleware)
 app.use("/api/books", protect, bookRoutes);
+app.use("/api/orders", protect, orderRoutes);
+app.use("/api/favorites", protect, favoriteRoutes);
 
-// Optional: a public route example without auth (e.g. home page)
+// Optional: a public root route
 app.get("/", (req, res) => res.send("Welcome to BookBazaar API"));
 
 // Start server

@@ -1,12 +1,12 @@
 import axios from 'axios';
 import Book from '../models/Book.js';
 
-// Rate limiter (less aggressive)
+// Rate limiter config
 const rateLimitWindowMs = 60 * 1000; // 1 minute
 const maxRequestsPerWindow = 50;
 const requestCounts = new Map();
 
-function rateLimiter(req, res, next) {
+export function rateLimiter(req, res, next) {
   const ip = req.ip;
   const now = Date.now();
 
@@ -48,7 +48,6 @@ export async function extractTags(req, res) {
     await book.save();
 
     res.json({ tags, cached: false });
-
   } catch (err) {
     console.error('❌ Tag extraction failed:', err.message);
 
@@ -88,9 +87,8 @@ export async function predictGenre(req, res) {
 
     const genre = mlRes.data.genre || ['General'];
     res.json({ predicted_genre: genre });
-
   } catch (err) {
-    console.error('❌ Genre prediction (raw summary) failed:', err.message);
+    console.error('❌ Genre prediction failed:', err.message);
 
     if (err.response && err.response.status === 429) {
       return res.status(429).json({
@@ -108,7 +106,7 @@ export async function getAutocompleteSuggestions(req, res) {
     const { query } = req.query;
     if (!query) return res.status(400).json({ error: 'Query parameter required' });
 
-    // Dummy autocomplete suggestions; replace with actual ML call if you want
+    // Dummy autocomplete suggestions
     const suggestions = [
       query + ' book',
       query + ' author',
@@ -121,5 +119,3 @@ export async function getAutocompleteSuggestions(req, res) {
     res.status(500).json({ error: 'Autocomplete failed' });
   }
 }
-
-export { rateLimiter };

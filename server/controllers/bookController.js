@@ -1,11 +1,16 @@
-const Book = require('../models/Book');
-const mongoose = require('mongoose');
-const { validationResult } = require('express-validator');
-const fs = require('fs');
-const path = require('path');
+import Book from '../models/Book.js';
+import mongoose from 'mongoose';
+import { validationResult } from 'express-validator';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Helper to get __dirname in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // ➕ Add book
-exports.addBook = async (req, res) => {
+export const addBook = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
@@ -37,7 +42,7 @@ exports.addBook = async (req, res) => {
 };
 
 // 📃 My Books
-exports.getMyBooks = async (req, res) => {
+export const getMyBooks = async (req, res) => {
   try {
     const books = await Book.find({ seller: req.user._id || req.user.id });
     res.json(books);
@@ -48,7 +53,7 @@ exports.getMyBooks = async (req, res) => {
 };
 
 // ❌ Delete
-exports.deleteBook = async (req, res) => {
+export const deleteBook = async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
     if (!book) return res.status(404).json({ error: 'Book not found' });
@@ -71,7 +76,7 @@ exports.deleteBook = async (req, res) => {
 };
 
 // ✏️ Update
-exports.updateBook = async (req, res) => {
+export const updateBook = async (req, res) => {
   try {
     const { title, author, summary, price, condition, genre } = req.body;
     const book = await Book.findById(req.params.id);
@@ -98,7 +103,7 @@ exports.updateBook = async (req, res) => {
 };
 
 // 🔍 All books with filters and pagination
-exports.getAllBooks = async (req, res) => {
+export const getAllBooks = async (req, res) => {
   try {
     const { genre, condition, minPrice, maxPrice, search, page = 1, limit = 12 } = req.query;
     const query = {};
@@ -135,7 +140,7 @@ exports.getAllBooks = async (req, res) => {
 };
 
 // 📥 Fetch books by IDs
-exports.getBooksByIds = async (req, res) => {
+export const getBooksByIds = async (req, res) => {
   try {
     const { ids } = req.query;
     const idArray = ids?.split(',').filter(id => mongoose.Types.ObjectId.isValid(id));
@@ -150,7 +155,7 @@ exports.getBooksByIds = async (req, res) => {
 };
 
 // 🎯 Get books by genre
-exports.getBooksByGenre = async (req, res) => {
+export const getBooksByGenre = async (req, res) => {
   try {
     const { genre } = req.query;
     if (!genre) return res.status(400).json({ error: 'Genre is required' });
@@ -164,7 +169,7 @@ exports.getBooksByGenre = async (req, res) => {
 };
 
 // 📄 Get one book by ID
-exports.getBookById = async (req, res) => {
+export const getBookById = async (req, res) => {
   try {
     const book = await Book.findById(req.params.id).populate('seller', 'name email');
     if (!book) return res.status(404).json({ error: 'Book not found' });

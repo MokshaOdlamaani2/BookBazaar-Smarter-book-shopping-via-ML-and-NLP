@@ -1,10 +1,10 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const router = express.Router();
-const { protect } = require('../middleware/authMiddleware');
-const UserFavorite = require('../models/UserFavorite');
+import express from 'express';
+import mongoose from 'mongoose';
+import { protect } from '../middleware/authMiddleware.js';
+import UserFavorite from '../models/UserFavorite.js';
 
-// ➕ Add to favorites
+const router = express.Router();
+
 router.post('/', protect, async (req, res) => {
   const userId = req.user.id;
   const { bookId } = req.body;
@@ -19,14 +19,13 @@ router.post('/', protect, async (req, res) => {
       { $set: { userId, bookId } },
       { upsert: true }
     );
-    res.status(200).json({ success: true });
+    res.status(200).json({ message: 'Added to favorites' });
   } catch (err) {
     console.error("❌ Add favorite error:", err.message);
     res.status(500).json({ error: 'Failed to add to favorites' });
   }
 });
 
-// ❌ Remove from favorites
 router.delete('/:bookId', protect, async (req, res) => {
   const userId = req.user.id;
   const { bookId } = req.params;
@@ -40,14 +39,13 @@ router.delete('/:bookId', protect, async (req, res) => {
       userId,
       bookId: new mongoose.Types.ObjectId(bookId),
     });
-    res.status(200).json({ success: true });
+    res.status(200).json({ message: 'Removed from favorites' });
   } catch (err) {
     console.error("❌ Remove favorite error:", err.message);
     res.status(500).json({ error: 'Failed to remove favorite' });
   }
 });
 
-// 📥 Get all favorites
 router.get('/', protect, async (req, res) => {
   try {
     const favorites = await UserFavorite.find({ userId: req.user.id }).populate('bookId');
@@ -59,4 +57,4 @@ router.get('/', protect, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

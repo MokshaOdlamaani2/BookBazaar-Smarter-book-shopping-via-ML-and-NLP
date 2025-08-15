@@ -1,7 +1,7 @@
-const Order = require("../models/Order");
+import Order from '../models/Order.js';
 
 // Place an order
-exports.placeOrder = async (req, res) => {
+export const placeOrder = async (req, res) => {
   const { items, total } = req.body;
   if (!items || !items.length || !total) {
     return res.status(400).json({ error: 'Invalid order data' });
@@ -17,7 +17,7 @@ exports.placeOrder = async (req, res) => {
 };
 
 // Get orders for logged-in user
-exports.getOrders = async (req, res) => {
+export const getOrders = async (req, res) => {
   try {
     const orders = await Order.find({ user: req.user.id }).sort({ orderedAt: -1 });
     res.json(orders);

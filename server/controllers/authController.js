@@ -1,6 +1,5 @@
-// controllers/authController.js
-const User = require('../models/User');
-const jwt = require('jsonwebtoken');
+import User from '../models/User.js';
+import jwt from 'jsonwebtoken';
 
 const generateToken = (user) => {
   return jwt.sign(
@@ -10,7 +9,7 @@ const generateToken = (user) => {
   );
 };
 
-exports.register = async (req, res) => {
+export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -28,9 +27,9 @@ exports.register = async (req, res) => {
   }
 };
 
-exports.login = async (req, res) => {
+export const login = async (req, res) => {
   const { email, password } = req.body;
-  
+
   try {
     const user = await User.findOne({ email });
     if (!user) return res.status(401).json({ error: 'Invalid credentials' });
@@ -53,8 +52,8 @@ exports.login = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
-// Get logged-in user profile
-exports.getProfile = async (req, res) => {
+
+export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
     if (!user) return res.status(404).json({ error: 'User not found' });

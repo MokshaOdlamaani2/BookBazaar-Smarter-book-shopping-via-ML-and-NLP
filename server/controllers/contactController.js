@@ -1,6 +1,6 @@
-const nodemailer = require("nodemailer");
+import nodemailer from 'nodemailer';
 
-exports.sendContactMail = async (req, res) => {
+export const sendContactMail = async (req, res) => {
   const { sellerEmail, buyerName, buyerEmail, message } = req.body;
   if (!sellerEmail || !buyerName || !buyerEmail || !message) {
     return res.status(400).json({ error: 'All fields are required.' });
