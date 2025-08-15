@@ -1,6 +1,7 @@
-const express = require('express');
+import express from 'express';
+import mlController from '../controllers/mlController.js';
+
 const router = express.Router();
-const mlController = require('../controllers/mlController');
 
 // 🔮 Predict genre
 router.post('/predict-genre', mlController.predictGenre);
@@ -17,4 +18,4 @@ router.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong in ML routes.' });
 });
 
-module.exports = router;
+export default router;

@@ -6,7 +6,7 @@ import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
 import Book from "./models/Book.js";
-import mlRoutes from "./routes/mlRoutes.js"; // ✅ Import ML routes
+import mlRoutes from "./routes/mlRoutes.js"; // ES module import
 
 dotenv.config();
 const app = express();
@@ -23,9 +23,7 @@ if (!fs.existsSync(uploadDir)) {
 
 // Multer config
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadDir);
-    },
+    destination: (req, file, cb) => cb(null, uploadDir),
     filename: (req, file, cb) => {
         const uniqueName = Date.now() + path.extname(file.originalname);
         cb(null, uniqueName);
@@ -36,7 +34,7 @@ const upload = multer({ storage });
 // Serve uploaded images statically
 app.use("/uploads", express.static(uploadDir));
 
-// ✅ Use ML routes (e.g., /api/ml/predict-genre, /api/ml/extract-tags/:id)
+// Use ML routes
 app.use("/api/ml", mlRoutes);
 
 // MongoDB connection
@@ -47,7 +45,7 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log("✅ MongoDB Connected"))
 .catch((err) => console.error("❌ MongoDB Error:", err));
 
-// ✅ Add Book route
+// Add Book route
 app.post("/api/books/add", upload.single("image"), async (req, res) => {
     try {
         if (!req.file) {
@@ -61,7 +59,7 @@ app.post("/api/books/add", upload.single("image"), async (req, res) => {
             condition: req.body.condition,
             genre: req.body.genre,
             price: req.body.price,
-            image: req.file.filename,
+            image: `/uploads/${req.file.filename}`, // Note fix here, add '/uploads/'
         });
 
         await newBook.save();
